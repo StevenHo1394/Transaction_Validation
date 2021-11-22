@@ -9,7 +9,7 @@ Clone this repo, go the the folder you just cloned and execute the following in 
 
 Run "npm install"
 
-Run the sql script "create_db.sql" (e.g. mysql -u {yourusername} -p {yourpassword} < create_db.sql)
+Run the sql script "create_db.sql" (e.g. mysql -u {yourusername} -p < create_db.sql)
 
 Run the sql script "create_tables.sql" (e.g. mysql -u {yourusername} -p {yourpassword} TxnValidation < create_tables.sql)
 
