@@ -13,4 +13,6 @@ Run the sql script "create_db.sql" (e.g. mysql -u {yourusername} -p {yourpasswor
 
 Run the sql script "create_tables.sql" (e.g. mysql -u {yourusername} -p {yourpassword} TxnValidation < create_tables.sql)
 
-Run "npm server.js". Open browser and visit http://localhost:8080/form
+Run "npm server.js". 
+
+Open browser and visit http://localhost:8080/form. Of course, you can open the browser on another machine, just change the ip of the link accordingly.
