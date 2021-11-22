@@ -3,7 +3,7 @@ A simple web server to collect transaction validation information from users. Af
 
 Usage:
 
-Install mysql server on your machine and create a user.
+Install mysql server on your machine and create a user (c.f. https://www.digitalocean.com/community/tutorials/how-to-install-mysql-on-ubuntu-20-04).
 
 Clone this repo, go the the folder you just cloned and execute the following in the command prompt of your machine:
 
