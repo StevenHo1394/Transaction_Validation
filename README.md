@@ -5,7 +5,7 @@ Usage:
 
 Install mysql server on your machine and create a user.
 
-Clone this repo, and execute the following in order:
+Clone this repo, and execute the following in order on your machine:
 
 Run "npm install"
 
