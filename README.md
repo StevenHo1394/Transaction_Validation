@@ -4,7 +4,7 @@ A simple web server to collect transaction validation information from users. Af
 Usage:
 Run "npm install"
 
-Run the sql script "create_db.sql" (e.g. mysql -u yourusername -p yourpassword yourdatabase < create_db.sql)
+Run the sql script "create_db.sql" (e.g. mysql -u yourusername -p yourpassword < create_db.sql)
 
 Run the sql script "create_tables.sql" (e.g. mysql -u yourusername -p yourpassword yourdatabase < create_tables.sql)
 
