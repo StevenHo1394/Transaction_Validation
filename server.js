@@ -23,13 +23,16 @@ app.use(session(session_configuration));
 app.use(cookieParser('whoopity whoopity whoop whoop'));
 app.use(passport.initialize());
 app.use(passport.session());
-
+//app.use(express.urlencoded());
+app.use(express.json());
+express.urlencoded({ extended: true })
 
 var users = {
     "id123456" :  { id: 123456, username: "marcwan", password: "boo" },
     "id1" : { id: 1, username: "admin", password: "admin" }
 };
 
+/*
 function authenticatedOrNot(req, res, next){
     if(req.isAuthenticated()){
         next();
@@ -37,7 +40,7 @@ function authenticatedOrNot(req, res, next){
         res.redirect("/form");
     }
 }
-
+*/
 
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }))
@@ -157,15 +160,18 @@ app.post("/form",
 */
 
 app.post("/form",  function (req, res) {
-		 	console.log("form = " + res.get(form))
+		 	//console.log("form = " + res.get(form))
+
+			console.log("txn_hash=" + req.body.txn_hash);
+			console.log("txn_type=" + req.body.txn_type);
 		}
         );
 
-
+/*
 app.get("/members", authenticatedOrNot, function (req, res) {
     res.send("secret members only area!");
 });
-
+*/
 
 app.listen(8080);
 
