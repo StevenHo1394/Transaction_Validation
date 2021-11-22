@@ -11,7 +11,7 @@ Run "npm install"
 
 Run the sql script "create_db.sql" (e.g. mysql -u {yourusername} -p < create_db.sql)
 
-Run the sql script "create_tables.sql" (e.g. mysql -u {yourusername} -p {yourpassword} TxnValidation < create_tables.sql)
+Run the sql script "create_tables.sql" (e.g. mysql -u {yourusername} -p TxnValidation < create_tables.sql)
 
 Run "npm server.js". 
 
