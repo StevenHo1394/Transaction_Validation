@@ -7,7 +7,7 @@ CREATE TABLE Transactions
   transaction_hash VARCHAR(255),
   ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   transaction_type_id VARCHAR(255)
-	foreign key REFERENCES TransactionTypes(tid)
+	foreign key REFERENCES TransactionTypes(tid),
   constraint Transactions_id_uindex
 	unique (id)
 )
