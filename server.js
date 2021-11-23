@@ -195,9 +195,9 @@ app.post("/form",  function (req, res) {
   				database: 'TxnValidation' 
 			});
 
-			console.log("before connection to DB")
+			//console.log("before connection to DB")
 			mysqlConnection.connect()
-			console.log("after connection to DB")
+			//console.log("after connection to DB")
 
 			//insert into Transactions table
 			var insTransactionTypesStmt = `INSERT INTO TransactionTypes (name, description, amount) VALUES (?, ?, ?)`;
@@ -210,6 +210,45 @@ app.post("/form",  function (req, res) {
 				console.log("insert Id(Transaction Types):" + results.insertId);
 			});
 
+			//fixme: forign key constraint
+			//insert into TransactionTypes table
+			//var insTransactionStmt = `INSERT INTO Transactions (discord_id, txn_hash) VALUES (?, ?)`;
+			//var insTransactionParm = [req.body.discord_id, req.body.txn_hash]
+
+			//insert into TwitterPost table
+			var insTwitterPostStmt = `INSERT INTO TwitterPost (discord_id, twitter_url) VALUES (?, ?)`;
+			var insTwitterPostParm = [req.body.discord_id, req.body.twitter_url];
+
+			mysqlConnection.query(insTwitterPostStmt, insTwitterPostParm, (err, results, fields) => {
+                                if (err) {
+                                        return console.error(err.message);
+                                }
+                                console.log("insert Id(Twitter Post):" + results.insertId);
+                        });
+
+			//insert into ArticlePost table
+                        var insArticlePostStmt = `INSERT INTO ArticlePost (discord_id, article_url) VALUES (?, ?)`;
+                        var insArticlePostParm = [req.body.discord_id, req.body.article_url];
+
+                        mysqlConnection.query(insArticlePostStmt, insArticlePostParm, (err, results, fields) => {
+                                if (err) {
+                                        return console.error(err.message);
+                                }
+                                console.log("insert Id(Article Post):" + results.insertId);
+                        });
+
+			//insert into Incentives_Gained table
+                        var insIncentivesGainedStmt = `INSERT INTO Incentives_Gained (discord_id, valued_transactions, total_transactions, amount_gained) VALUES (?, ?, ?, ?)`;
+                        var insIncentivesGainedParm = [req.body.discord_id, req.body.valued_txn, req.body.total_txn, req.body.amount_gained];
+
+                        mysqlConnection.query(insIncentivesGainedStmt, insIncentivesGainedParm, (err, results, fields) => {
+                                if (err) {
+                                        return console.error(err.message);
+                                }
+                                console.log("insert Id(Incentives Gained):" + results.insertId);
+                        });
+
+			/*
 	                var testsql = `select * from TransactionTypes`;
                         mysqlConnection.query(testsql, (err, results, fields) => {
                                 if (err) {
@@ -217,12 +256,13 @@ app.post("/form",  function (req, res) {
                                 }
                                 console.log(results);
                         });
+			*/
 
 			//var insTransactionStmt = `INSERT INTO Transactions (discord_id, txn_hash, tid) VALUES (?, ?, ?)`;
 			
-			console.log("before disconnect from DB")
+			//console.log("before disconnect from DB")
 			mysqlConnection.end()
-			console.log("before disconnect from DB")
+			//console.log("before disconnect from DB")
 		}
         );
 

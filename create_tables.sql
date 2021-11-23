@@ -60,7 +60,8 @@ CREATE TABLE Incentives_Gained
   cid int NOT NULL auto_increment
 	primary key, 
   discord_id VARCHAR(255),
-  valued_transactions VARCHAR(255),
+  valued_transactions int,
+  total_transactions int,
   amount_gained VARCHAR(255),
   constraint Incentives_Gained_cid_uindex
 	unique (cid),
