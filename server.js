@@ -186,7 +186,6 @@ app.post("/form",  function (req, res) {
 			console.log("valued_txn=" + req.body.valued_txn);
 			console.log("total_txn=" + req.body.total_txn);
 			console.log("amount_gained=" + req.body.amount_gained);
-			//console.log("pull_down_test=" + req.body.pull_down_test); 
 
 			var mysqlConnection = mysql.createConnection({     
   				host     : 'localhost',       
@@ -200,6 +199,27 @@ app.post("/form",  function (req, res) {
 			mysqlConnection.connect()
 			console.log("after connection to DB")
 
+			//insert into Transactions table
+			var insTransactionTypesStmt = `INSERT INTO TransactionTypes (name, description, amount) VALUES (?, ?, ?)`;
+			var insTransactionTypesParm = [req.body.txn_type, req.body.txn_description, req.body.txn_amount];
+
+			mysqlConnection.query(insTransactionTypesStmt, insTransactionTypesParm, (err, results, fields) => {
+				if (err) {
+					return console.error(err.message);
+				}
+				console.log("insert Id(Transaction Types):" + results.insertId);
+			});
+
+	                var testsql = `select * from TransactionTypes`;
+                        mysqlConnection.query(testsql, (err, results, fields) => {
+                                if (err) {
+                                    return console.error(err.message);
+                                }
+                                console.log(results);
+                        });
+
+			//var insTransactionStmt = `INSERT INTO Transactions (discord_id, txn_hash, tid) VALUES (?, ?, ?)`;
+			
 			console.log("before disconnect from DB")
 			mysqlConnection.end()
 			console.log("before disconnect from DB")

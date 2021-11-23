@@ -11,9 +11,8 @@ CREATE TABLE TransactionTypes
   tid int NOT NULL auto_increment
 	primary key,
   name VARCHAR(255),
-  transaction_hash VARCHAR(255),
   description VARCHAR(255),
-  amount DOUBLE
+  amount VARCHAR(255)
 )
 ENGINE = InnoDB;
 
