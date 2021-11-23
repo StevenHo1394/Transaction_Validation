@@ -9,9 +9,9 @@ Clone this repo, go the the folder you just cloned and execute the following in 
 
 Run "npm install"
 
-Run the sql script "create_db.sql" (mysql -u {yourusername} -p < create_db.sql)
+Run "mysql -u {yourusername} -p < create_db.sql"
 
-Run the sql script "create_tables.sql" (mysql -u {yourusername} -p TxnValidation < create_tables.sql)
+Run "mysql -u {yourusername} -p TxnValidation < create_tables.sql"
 
 In "server.js", modifiy the following according to {yourusername} and {yourpassword}:
 
