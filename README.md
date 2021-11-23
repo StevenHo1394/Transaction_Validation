@@ -9,16 +9,16 @@ Clone this repo, go the the folder you just cloned and execute the following in 
 
 Run "npm install"
 
-Run "mysql -u {yourusername} -p < create_db.sql"
+Run "mysql -u yourusername -p < create_db.sql"
 
-Run "mysql -u {yourusername} -p TxnValidation < create_tables.sql"
+Run "mysql -u yourusername -p TxnValidation < create_tables.sql"
 
-In "config.js", modifiy the following according to {yourusername} and {yourpassword}:
+In "config.js", modifiy the following according to yourusername and yourpassword:
 
 	module.exports.databaseOptions = {
 	      	host     : 'localhost',
-	      	user     : '{yourusername}',
-        	password : '{yourpassword}',
+	      	user     : 'yourusername',
+        	password : 'yourpassword',
         	port: '3306',
         	database: 'TxnValidation'
 	};
