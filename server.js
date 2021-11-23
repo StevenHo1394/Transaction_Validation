@@ -187,6 +187,7 @@ app.post("/form",  function (req, res) {
 			console.log("total_txn=" + req.body.total_txn);
 			console.log("amount_gained=" + req.body.amount_gained);
 
+			/*
 			var mysqlConnection = mysql.createConnection({     
   				host     : 'localhost',       
   				user     : 'test',              
@@ -194,6 +195,10 @@ app.post("/form",  function (req, res) {
  				port: '3306',                   
   				database: 'TxnValidation' 
 			});
+			*/
+
+			var dbConfig = require('./config.js')
+			var mysqlConnection = mysql.createConnection(dbConfig.databaseOptions);
 
 			//console.log("before connection to DB")
 			mysqlConnection.connect()
