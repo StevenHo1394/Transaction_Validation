@@ -1,4 +1,11 @@
+Use TxnValidation;
+
+DROP TABLE If EXISTS Transactions;
 DROP TABLE If EXISTS TransactionTypes;
+DROP TABLE If EXISTS TwitterPost;
+DROP TABLE If EXISTS ArticlePost;
+DROP TABLE If EXISTS Incentives_Gained;
+
 CREATE TABLE TransactionTypes
 (
   tid int NOT NULL auto_increment
@@ -10,7 +17,6 @@ CREATE TABLE TransactionTypes
 )
 ENGINE = InnoDB;
 
-DROP TABLE If EXISTS Transactions;
 CREATE TABLE Transactions
 (
   id int NOT NULL auto_increment
@@ -24,7 +30,6 @@ CREATE TABLE Transactions
 )
 ENGINE = InnoDB;
 
-DROP TABLE If EXISTS TwitterPost;
 CREATE TABLE TwitterPost
 (
   tid int NOT NULL auto_increment
@@ -39,7 +44,6 @@ CREATE TABLE TwitterPost
 )
 ENGINE = InnoDB;
 
-DROP TABLE If EXISTS ArticlePost;
 CREATE TABLE ArticlePost
 (
   aid int NOT NULL auto_increment
@@ -52,7 +56,6 @@ CREATE TABLE ArticlePost
 )
 ENGINE = InnoDB;
 
-DROP TABLE If EXISTS Incentives_Gained;
 CREATE TABLE Incentives_Gained
 (
   cid int NOT NULL auto_increment
