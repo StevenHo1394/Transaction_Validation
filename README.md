@@ -1,5 +1,5 @@
 # Transaction_Validation
-A simple node.js web server to collect transaction validation information from users. After the user has filled and submitted it, the data will be stored in the correspinding DB tables in the server.
+A simple node.js web server to collect transaction validation information from users. After the user has filled and submitted it, the data will be stored in the corresponding DB tables in the server.
 
 Usage:
 
@@ -9,9 +9,9 @@ Clone this repo, go the the folder you just cloned and execute the following in 
 
 Run "npm install"
 
-Run the sql script "create_db.sql" (mysql -u {yourusername} -p < create_db.sql)
+Run "mysql -u {yourusername} -p < create_db.sql"
 
-Run the sql script "create_tables.sql" (mysql -u {yourusername} -p TxnValidation < create_tables.sql)
+Run "mysql -u {yourusername} -p TxnValidation < create_tables.sql"
 
 In "server.js", modifiy the following according to {yourusername} and {yourpassword}:
 
@@ -23,6 +23,6 @@ In "server.js", modifiy the following according to {yourusername} and {yourpassw
     database: 'TxnValidation' 
   }); 
 
-Run "npm server.js". 
+Run "node server.js". 
 
 Open browser and visit http://localhost:8080/form. Of course, you can open the browser on another machine, just change the "localhost" to your server's ip.
