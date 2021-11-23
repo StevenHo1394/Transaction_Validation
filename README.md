@@ -1,5 +1,5 @@
 # Transaction_Validation
-A simple node.js web server to collect transaction validation information from users. After the user has filled and submitted it, the data will be stored in the correspinding DB tables in the server.
+A simple node.js web server to collect transaction validation information from users. After the user has filled and submitted it, the data will be stored in the corresponding DB tables in the server.
 
 Usage:
 
