@@ -17,8 +17,8 @@ In "server.js", modifiy the following according to {yourusername} and {yourpassw
 
 var connection = mysql.createConnection({     
   host     : 'localhost',       
-  user     : "yourusername",              
-  password : "yourpassword",       
+  user     : 'yourusername',              
+  password : 'yourpassword',       
   port: '3306',                   
   database: 'TxnValidation' 
 }); 
