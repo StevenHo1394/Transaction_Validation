@@ -15,13 +15,13 @@ Run the sql script "create_tables.sql" (e.g. mysql -u {yourusername} -p TxnValid
 
 In "server.js", modifiy the following according to {yourusername} and {yourpassword}:
 
-var connection = mysql.createConnection({     
+  var connection = mysql.createConnection({     
   host     : 'localhost',       
   user     : 'yourusername',              
   password : 'yourpassword',       
   port: '3306',                   
   database: 'TxnValidation' 
-}); 
+  }); 
 
 Run "npm server.js". 
 
