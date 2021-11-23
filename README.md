@@ -23,6 +23,6 @@ In "server.js", modifiy the following according to {yourusername} and {yourpassw
     database: 'TxnValidation' 
   }); 
 
-Run "npm server.js". 
+Run "node server.js". 
 
 Open browser and visit http://localhost:8080/form. Of course, you can open the browser on another machine, just change the "localhost" to your server's ip.
