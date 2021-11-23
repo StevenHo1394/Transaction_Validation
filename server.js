@@ -1,11 +1,12 @@
 
 var express = require('express'),
-    cookieParser = require('cookie-parser'),
+    //cookieParser = require('cookie-parser'),
     session = require('express-session'),
-    passport = require("passport"),
-    LocalStrategy = require('passport-local').Strategy,
+    //passport = require("passport"),
+    //LocalStrategy = require('passport-local').Strategy,
     bodyParser = require('body-parser'),
     flash = require('express-flash');
+    mysql = require('mysql2');
 
 var app = express();
 
@@ -20,17 +21,18 @@ session_configuration.cookie.secure = false;
 
 app.use(flash());
 app.use(session(session_configuration));
-app.use(cookieParser('whoopity whoopity whoop whoop'));
-app.use(passport.initialize());
-app.use(passport.session());
-//app.use(express.urlencoded());
+//app.use(cookieParser('whoopity whoopity whoop whoop'));
+//app.use(passport.initialize());
+//app.use(passport.session());
 app.use(express.json());
 express.urlencoded({ extended: true })
 
+/*
 var users = {
     "id123456" :  { id: 123456, username: "marcwan", password: "boo" },
     "id1" : { id: 1, username: "admin", password: "admin" }
 };
+*/
 
 /*
 function authenticatedOrNot(req, res, next){
@@ -48,7 +50,7 @@ app.use(bodyParser.urlencoded({ extended: false }))
 // parse application/json
 app.use(bodyParser.json())
 
-
+/*
 passport.use(new LocalStrategy(
     function(username, password, done) {
         setTimeout(function () {
@@ -81,6 +83,7 @@ passport.deserializeUser(function(userid, done) {
         done(new Error("CANTFINDUSER"));
     }
 });
+*/
 
 app.get('/', function(req, res) {
     console.log(req.flash());
@@ -110,13 +113,25 @@ app.get("/form", function (req, res) {
         '        <label>Transaction Hash:</label>' +
         '        <input type="text" name="txn_hash"/>' +
         '    </div>' +
+	/*		
         '    <div>' +
         '        <label>Transaction Type:</label>' +
         '        <input type="text" name="txn_type"/>' +
         '    </div>' +		
+	*/	
+        '    <div>' +
+        '        <p>Transaction Type:</>' +
+        '        <select name = "txn_type">' +
+        '               <option value = "Validator Creation Transaction">Validator Creation Transaction</option>' +
+        '               <option value = "Delegation Transaction">Delegation Transaction</option>' +
+	'               <option value = "Denom Creation Transaction">Denom Creation Transaction</option>' +			
+	'               <option value = "NFT collection minting Transaction">NFT collection minting Transaction</option>' +		
+	'               <option value = "Governance Proposal Voting Transaction">Governance Proposal Voting Transaction</option>' +	
+        '        </select>' +
+        '    </div>' +		
         '    <div>' +
         '        <label>Transaction Description:</label>' +
-        '        <input type="text" name="txn_describtion"/>' +
+        '        <input type="text" name="txn_description"/>' +
         '    </div>' +
         '    <div>' +
         '        <label>Transaction Amount:</label>' +
@@ -141,6 +156,7 @@ app.get("/form", function (req, res) {
         '    <div>' +
         '        <input type="submit" value="Submit"/>' +
         '    </div>' +
+	
         '</form>';
 
     if (error && error.length) {
@@ -160,10 +176,33 @@ app.post("/form",
 */
 
 app.post("/form",  function (req, res) {
-		 	//console.log("form = " + res.get(form))
 
+			console.log("discord_id=" + req.body.discord_id);
 			console.log("txn_hash=" + req.body.txn_hash);
 			console.log("txn_type=" + req.body.txn_type);
+			console.log("txn_description=" + req.body.txn_description);
+			console.log("txn_amount=" + req.body.txn_amount);
+			console.log("twitter_url=" + req.body.twitter_url);
+			console.log("valued_txn=" + req.body.valued_txn);
+			console.log("total_txn=" + req.body.total_txn);
+			console.log("amount_gained=" + req.body.amount_gained);
+			//console.log("pull_down_test=" + req.body.pull_down_test); 
+
+			var mysqlConnection = mysql.createConnection({     
+  				host     : 'localhost',       
+  				user     : 'test',              
+  				password : 'newpassword',       
+ 				port: '3306',                   
+  				database: 'TxnValidation' 
+			});
+
+			console.log("before connection to DB")
+			mysqlConnection.connect()
+			console.log("after connection to DB")
+
+			console.log("before disconnect from DB")
+			mysqlConnection.end()
+			console.log("before disconnect from DB")
 		}
         );
 
