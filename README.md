@@ -15,13 +15,13 @@ Run "mysql -u {yourusername} -p TxnValidation < create_tables.sql"
 
 In "config.js", modifiy the following according to {yourusername} and {yourpassword}:
 
-module.exports.databaseOptions = {
+	module.exports.databaseOptions = {
 	      host     : 'localhost',
 	      user     : '{yourusername}',
         password : '{yourpassword}',
         port: '3306',
         database: 'TxnValidation'
-};
+	};
 
 Run "node server.js". 
 
