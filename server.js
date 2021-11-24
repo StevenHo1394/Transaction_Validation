@@ -190,13 +190,18 @@ app.post("/form",  function (req, res) {
 			var mysqlConnection = mysql.createConnection(dbConfig.databaseOptions);
 
 			mysqlConnection.connect();
+
 			mysqlConnection.on('error', function(err) {
    	 			console.log(err);
 			});
 
-			mysqlConnection.query(`BEGIN`);
-
-			//console.log("insert into TransactionTypes table");
+			mysqlConnection.query(`BEGIN`, function(err) {
+				if (err) {
+                                        return mysqlConnection.rollback(function(err) {
+                                                throw err;
+                                        });
+                                }
+                        });
 
 			//insert into Transactions table
 			var insTransactionTypesStmt = `INSERT INTO TransactionTypes (name, description, amount) VALUES (?, ?, ?)`;
@@ -205,30 +210,20 @@ app.post("/form",  function (req, res) {
 			mysqlConnection.query(insTransactionTypesStmt, insTransactionTypesParm, (err, results, fields) => {
 				if (err) {
 					console.log("rollback on TransactionTypes table!");
-					//mysqlConnection.query(`ROLLBACK`);
-					//return console.error(err.message);
-					//res.send("<b style='color: red'> " + err[0] + "</b><br/>");
 					return mysqlConnection.rollback(function() {
                                                 throw err;
                                         });
 				}
 				console.log("insert Id(Transaction Types):" + results.insertId);
 			});
-			//var lastInsId = mysqlConnection.query(`SELECT LAST_INSERT_ID()`)
-			//lastInsId = lastInsId.toString()
 
 			//insert into TransactionTypes table
-			//var insTransactionStmt = `INSERT INTO Transactions (discord_id, transaction_hash, tid) VALUES (?, ?, ?)`;
 			var insTransactionStmt = `INSERT INTO Transactions SET tid = (SELECT LAST_INSERT_ID()), discord_id = ?, transaction_hash = ?`;
-			//var insTransactionParm = [req.body.discord_id, req.body.txn_hash, lastInsId]
 			var insTransactionParm = [req.body.discord_id, req.body.txn_hash]
 
 			mysqlConnection.query(insTransactionStmt, insTransactionParm, (err, results, fields) => {
                                 if (err) {
                                         console.log("rollback on Transaction table!");
-                                        //mysqlConnection.query(`ROLLBACK`);
-                                        //return console.error(err.message);
-                                        //res.send("<b style='color: red'> " + err[0] + "</b><br/>");
                                         return mysqlConnection.rollback(function() {
                                                 throw err;
                                         });
@@ -243,9 +238,6 @@ app.post("/form",  function (req, res) {
 			mysqlConnection.query(insTwitterPostStmt, insTwitterPostParm, (err, results, fields) => {
                                 if (err) {
 					console.log("rollback on TwitterPost table!");
-					//mysqlConnection.query(`ROLLBACK`);
-                                        //return console.error(err.message);
-					//res.send("<b style='color: red'> " + err[0] + "</b><br/>");
 					return mysqlConnection.rollback(function() {
 						throw err;
 					});
@@ -260,8 +252,6 @@ app.post("/form",  function (req, res) {
                         mysqlConnection.query(insArticlePostStmt, insArticlePostParm, (err, results, fields) => {
                                 if (err) {
 					console.log("rollback on ArticlePost table!");
-					//mysqlConnection.query(`ROLLBACK`);
-                                        //return console.error(err.message);
 					return mysqlConnection.rollback(function() {
                                                 throw err;
                                         });
@@ -276,17 +266,18 @@ app.post("/form",  function (req, res) {
                         mysqlConnection.query(insIncentivesGainedStmt, insIncentivesGainedParm, (err, results, fields) => {
                                 if (err) {
 					console.log("rollback on Incentives_Gained table!");
-					//mysqlConnection.query(`ROLLBACK`);
-                                        //return console.error(err.message);
 					return mysqlConnection.rollback(function() {
                                                 throw err;
+						//throw new Error('my error');
+						//next(err);
+						//throw { status: 404, message: 'Not supported' }
+						//res.status(401, "Authentication mismatch").json({});
                                         });
                                 }
                                 console.log("insert Id(Incentives Gained):" + results.insertId);
                         });
 	
 			console.log("committing...");
-			//mysqlConnection.query(`COMMIT`);
 
 			mysqlConnection.commit(function(err) {
 				if (err) {
