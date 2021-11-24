@@ -34,7 +34,7 @@ CREATE TABLE TwitterPost
   tid int NOT NULL auto_increment
 	primary key, 
   discord_id VARCHAR(255),
-  twitter_url VARCHAR(255),
+  twitter_url VARCHAR(255) NOT NULL,
   ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   constraint TwitterPost_tid_uindex
 	unique (tid),
@@ -59,7 +59,7 @@ CREATE TABLE Incentives_Gained
 (
   cid int NOT NULL auto_increment
 	primary key, 
-  discord_id VARCHAR(255),
+  discord_id VARCHAR(255) NOT NULL,
   valued_transactions int,
   total_transactions int,
   amount_gained VARCHAR(255),

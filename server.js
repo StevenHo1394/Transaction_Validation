@@ -113,12 +113,6 @@ app.get("/form", function (req, res) {
         '        <label>Transaction Hash:</label>' +
         '        <input type="text" name="txn_hash"/>' +
         '    </div>' +
-	/*		
-        '    <div>' +
-        '        <label>Transaction Type:</label>' +
-        '        <input type="text" name="txn_type"/>' +
-        '    </div>' +		
-	*/	
         '    <div>' +
         '        <p>Transaction Type:</>' +
         '        <select name = "txn_type">' +
@@ -154,6 +148,10 @@ app.get("/form", function (req, res) {
         '        <input type="text" name="amount_gained"/>' +
         '    </div>' +
         '    <div>' +
+        '        <label>Article URL:</label>' +
+        '        <input type="text" name="article_url"/>' +
+        '    </div>' +		
+        '    <div>' +
         '        <input type="submit" value="Submit"/>' +
         '    </div>' +
 	
@@ -187,22 +185,21 @@ app.post("/form",  function (req, res) {
 			console.log("total_txn=" + req.body.total_txn);
 			console.log("amount_gained=" + req.body.amount_gained);
 
-			/*
-			var mysqlConnection = mysql.createConnection({     
-  				host     : 'localhost',       
-  				user     : 'test',              
-  				password : 'newpassword',       
- 				port: '3306',                   
-  				database: 'TxnValidation' 
-			});
-			*/
-
-			var dbConfig = require('./config.js')
+			var dbConfig = require('./config.js');
 			var mysqlConnection = mysql.createConnection(dbConfig.databaseOptions);
 
 			//console.log("before connection to DB")
-			mysqlConnection.connect()
+			mysqlConnection.connect();
 			//console.log("after connection to DB")
+
+			mysqlConnection.on('error', function(err) {
+   	 			console.log(err);
+			});
+
+			//mysqlConnection.query(`START TRANSACTION`);
+			mysqlConnection.query(`BEGIN`);
+
+			console.log("insert into TransactionTypes table");
 
 			//insert into Transactions table
 			var insTransactionTypesStmt = `INSERT INTO TransactionTypes (name, description, amount) VALUES (?, ?, ?)`;
@@ -210,15 +207,34 @@ app.post("/form",  function (req, res) {
 
 			mysqlConnection.query(insTransactionTypesStmt, insTransactionTypesParm, (err, results, fields) => {
 				if (err) {
-					return console.error(err.message);
+					console.log("rollback on TransactionTypes table!");
+					//mysqlConnection.query(`ROLLBACK`);
+					//return console.error(err.message);
+					//res.send("<b style='color: red'> " + err[0] + "</b><br/>");
+					return mysqlConnection.rollback(function() {
+                                                throw err;
+                                        });
 				}
 				console.log("insert Id(Transaction Types):" + results.insertId);
 			});
 
+			/*
+                        var testsql = `select * from TransactionTypes`;
+                        mysqlConnection.query(testsql, (err, results, fields) => {
+                                if (err) {
+					mysqlConnection.query(`ROLLBACK`);
+                                    	return console.error(err.message);
+                                }
+                                console.log(results);
+                        });
+			*/
+                        
 			//fixme: forign key constraint
 			//insert into TransactionTypes table
 			//var insTransactionStmt = `INSERT INTO Transactions (discord_id, txn_hash) VALUES (?, ?)`;
 			//var insTransactionParm = [req.body.discord_id, req.body.txn_hash]
+
+			console.log("insert into TwitterPost table...");
 
 			//insert into TwitterPost table
 			var insTwitterPostStmt = `INSERT INTO TwitterPost (discord_id, twitter_url) VALUES (?, ?)`;
@@ -226,7 +242,13 @@ app.post("/form",  function (req, res) {
 
 			mysqlConnection.query(insTwitterPostStmt, insTwitterPostParm, (err, results, fields) => {
                                 if (err) {
-                                        return console.error(err.message);
+					console.log("rollback on TwitterPost table!");
+					//mysqlConnection.query(`ROLLBACK`);
+                                        //return console.error(err.message);
+					//res.send("<b style='color: red'> " + err[0] + "</b><br/>");
+					return mysqlConnection.rollback(function() {
+						throw err;
+					});
                                 }
                                 console.log("insert Id(Twitter Post):" + results.insertId);
                         });
@@ -237,7 +259,12 @@ app.post("/form",  function (req, res) {
 
                         mysqlConnection.query(insArticlePostStmt, insArticlePostParm, (err, results, fields) => {
                                 if (err) {
-                                        return console.error(err.message);
+					console.log("rollback on ArticlePost table!");
+					//mysqlConnection.query(`ROLLBACK`);
+                                        //return console.error(err.message);
+					return mysqlConnection.rollback(function() {
+                                                throw err;
+                                        });
                                 }
                                 console.log("insert Id(Article Post):" + results.insertId);
                         });
@@ -248,7 +275,12 @@ app.post("/form",  function (req, res) {
 
                         mysqlConnection.query(insIncentivesGainedStmt, insIncentivesGainedParm, (err, results, fields) => {
                                 if (err) {
-                                        return console.error(err.message);
+					console.log("rollback on Incentives_Gained table!");
+					//mysqlConnection.query(`ROLLBACK`);
+                                        //return console.error(err.message);
+					return mysqlConnection.rollback(function() {
+                                                throw err;
+                                        });
                                 }
                                 console.log("insert Id(Incentives Gained):" + results.insertId);
                         });
@@ -264,9 +296,12 @@ app.post("/form",  function (req, res) {
 			*/
 
 			//var insTransactionStmt = `INSERT INTO Transactions (discord_id, txn_hash, tid) VALUES (?, ?, ?)`;
-			
+	
+			console.log("committing...");
+			mysqlConnection.query(`COMMIT`);
+
 			//console.log("before disconnect from DB")
-			mysqlConnection.end()
+			mysqlConnection.end();
 			//console.log("before disconnect from DB")
 		}
         );
