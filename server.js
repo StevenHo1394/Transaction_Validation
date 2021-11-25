@@ -5,8 +5,10 @@ var express = require('express'),
     //passport = require("passport"),
     //LocalStrategy = require('passport-local').Strategy,
     bodyParser = require('body-parser'),
-    flash = require('express-flash');
-    mysql = require('mysql2');
+    flash = require('express-flash'),
+    dbConfig = require('./config.js'),
+    mysql = require('mysql2/promise'),
+    HttpStatus = require('http-status-codes');
 
 var app = express();
 
@@ -26,13 +28,6 @@ app.use(session(session_configuration));
 //app.use(passport.session());
 app.use(express.json());
 express.urlencoded({ extended: true })
-
-/*
-var users = {
-    "id123456" :  { id: 123456, username: "marcwan", password: "boo" },
-    "id1" : { id: 1, username: "admin", password: "admin" }
-};
-*/
 
 /*
 function authenticatedOrNot(req, res, next){
@@ -96,15 +91,6 @@ app.get("/form", function (req, res) {
 
     var form = 
 	'<form action="/form" method="post">' +
-        /*'    <div>' +
-        '        <label>Username:</label>' +
-        '        <input type="text" name="username"/>' +
-        '    </div>' +
-        '    <div>' +
-        '        <label>Password:</label>' +
-        '        <input type="password" name="password"/>' +
-        '    </div>' +
-	*/
         '    <div>' +
         '        <label>Discord ID:</label>' +
         '        <input type="text" name="discord_id"/>' +
@@ -164,17 +150,19 @@ app.get("/form", function (req, res) {
     res.send(form);
 });
 
-/*
-app.post("/form",
-         passport.authenticate('local', { successRedirect: '/members',
-                                          failureRedirect: '/form',
-                                          successFlash: { message: "welcome back" },
-                                          failureFlash: true })
-        );
-*/
+app.get('/success', function(req, res) {
+    //console.log(req.flash());
+    res.send('form filled success!');
+});
+
+app.get('/fail', function(req, res) {
+    //console.log(req.flash());
+    res.send('form failed!');
+});
 
 app.post("/form",  function (req, res) {
 
+			/*			
 			console.log("discord_id=" + req.body.discord_id);
 			console.log("txn_hash=" + req.body.txn_hash);
 			console.log("txn_type=" + req.body.txn_type);
@@ -185,89 +173,238 @@ app.post("/form",  function (req, res) {
 			console.log("total_txn=" + req.body.total_txn);
 			console.log("amount_gained=" + req.body.amount_gained);
 			console.log("article_url=" + req.body.article_url);
+			*/
 
-			var dbConfig = require('./config.js');
-			var mysqlConnection = mysql.createConnection(dbConfig.databaseOptions);
+			//var dbConfig = require('./config.js');
+			//var mysqlConnection = mysql.createConnection(dbConfig.databaseOptions);
+
+			async function insertFormData2DB (req, res) {
+				console.log("entered insertFormDataDB");
+
+				console.log("discord_id=" + req.body.discord_id);
+                       		console.log("txn_hash=" + req.body.txn_hash);
+                        	console.log("txn_type=" + req.body.txn_type);
+                        	console.log("txn_description=" + req.body.txn_description);
+                        	console.log("txn_amount=" + req.body.txn_amount);
+                       		console.log("twitter_url=" + req.body.twitter_url);
+                        	console.log("valued_txn=" + req.body.valued_txn);
+                	        console.log("total_txn=" + req.body.total_txn);
+        	                console.log("amount_gained=" + req.body.amount_gained);
+	                        console.log("article_url=" + req.body.article_url);
+
+				const conn = await mysql.createConnection(dbConfig.databaseOptions);
+				var result = true;
+				var insTwitterPostParm = [req.body.discord_id, req.body.twitter_url];
+
+				try {
+					await conn.query('START TRANSACTION');
+
+                                        var insTwitterPostStmt = `INSERT INTO TwitterPost (discord_id, twitter_url) VALUES (?, ?)`;
+
+					console.log("parms = " + insTwitterPostParm[0] + ", " + insTwitterPostParm[1] );
+                                        await conn.execute(insTwitterPostStmt, insTwitterPostParm);
+                                }
+                                catch (err) {
+                                        console.log("error in inserting. Error message = " + err.message);
+
+					console.log("result chkpt1 = " + result);
+					result = false;
+					console.log("result chkpt2 = " + result);
+                                }
+
+				console.log("result chkpt3 = " + result);
+
+				if (result == true) {
+					console.log("No problem during insert! Committing...");
+					await conn.execute(`COMMIT`);
+					await conn.end();
+				} else {
+					console.log("Rollback...");
+					await conn.query(`ROLLBACK`);
+					await conn.end();
+				}
+
+				return result;
+			};
+
+			result = insertFormData2DB(req, res);
+			console.log("result chkpt4 = " + result);
+
+			if (result == true) {
+				return res.redirect('/success');
+			}
+			else {
+				return res.redirect('/fail');
+			}
+
+			//return res.redirect('/success');
+			//return res.redirect('/fail');
 
 			mysqlConnection.connect();
-
+			
 			mysqlConnection.on('error', function(err) {
-   	 			console.log(err);
+   	 			console.log("error event = " + err);
 			});
-
+			
 			mysqlConnection.query(`BEGIN`, function(err) {
 				if (err) {
                                         return mysqlConnection.rollback(function(err) {
-                                                throw err;
+                                                //throw err;
+						return res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ error: err, message: err.message }); // 500
                                         });
                                 }
                         });
 
-			//insert into Transactions table
+			//insert into TwitterPost table
+                        async function twitterPostInsert() {
+
+				console.log("entered twitterPostInsert()")
+
+                                try {
+					var insTwitterPostStmt = `INSERT INTO TwitterPost (discord_id, twitter_url) VALUES (?, ?)`;
+                        		var insTwitterPostParm = [req.body.discord_id, req.body.twitter_url];
+                                        await mysqlConnection.query(insTwitterPostStmt, insTwitterPostParm);
+                                }
+                                catch (err) {
+                                        console.log("error in inserting twitter post!");
+                                        mysqlConnection.rollback();
+                                        throw err;
+                                }                        
+			}
+
+			twitterPostInsert();
+
+			//insert into TransactionTypes table
 			var insTransactionTypesStmt = `INSERT INTO TransactionTypes (name, description, amount) VALUES (?, ?, ?)`;
 			var insTransactionTypesParm = [req.body.txn_type, req.body.txn_description, req.body.txn_amount];
 
-			mysqlConnection.query(insTransactionTypesStmt, insTransactionTypesParm, (err, results, fields) => {
+			async function transactionTypesInsert() {
+				await mysqlConnection.query(insTransactionTypesStmt, insTransactionTypesParm, function (err, results, fields) {
+                                if (err) {
+                                        console.log("rollback on TransactionTypes table!");
+                                        return mysqlConnection.rollback(function() {
+                                                //throw err;
+                                                return res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ error: err, message: err.message }); // 500
+                                        });
+                                }
+                                console.log("insert Id(Transaction Types):" + results.insertId);
+                        	});
+			}
+
+			/*
+			mysqlConnection.query(insTransactionTypesStmt, insTransactionTypesParm, function (err, results, fields) {
 				if (err) {
 					console.log("rollback on TransactionTypes table!");
 					return mysqlConnection.rollback(function() {
-                                                throw err;
+                                                //throw err;
+						return res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ error: err, message: err.message }); // 500
                                         });
 				}
 				console.log("insert Id(Transaction Types):" + results.insertId);
 			});
+			*/
 
-			//insert into TransactionTypes table
+			//insert into Transactions table
 			var insTransactionStmt = `INSERT INTO Transactions SET tid = (SELECT LAST_INSERT_ID()), discord_id = ?, transaction_hash = ?`;
 			var insTransactionParm = [req.body.discord_id, req.body.txn_hash]
 
-			mysqlConnection.query(insTransactionStmt, insTransactionParm, (err, results, fields) => {
+			async function transactionsInsert() {
+				await  mysqlConnection.query(insTransactionStmt, insTransactionParm, function (err, results, fields) {
                                 if (err) {
                                         console.log("rollback on Transaction table!");
                                         return mysqlConnection.rollback(function() {
-                                                throw err;
+                                                //throw err;
+                                                return res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ error: err, message: err.message }); // 500
+                                        });
+                                }
+                                console.log("insert Id(Transaction):" + results.insertId);
+                        	}); 
+			}
+
+			/*
+			mysqlConnection.query(insTransactionStmt, insTransactionParm, function (err, results, fields) {
+                                if (err) {
+                                        console.log("rollback on Transaction table!");
+                                        return mysqlConnection.rollback(function() {
+                                                //throw err;
+						return res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ error: err, message: err.message }); // 500
                                         });
                                 }
                                 console.log("insert Id(Transaction):" + results.insertId);
                         });
+			*/
 
-			//insert into TwitterPost table
-			var insTwitterPostStmt = `INSERT INTO TwitterPost (discord_id, twitter_url) VALUES (?, ?)`;
-			var insTwitterPostParm = [req.body.discord_id, req.body.twitter_url];
-
-			mysqlConnection.query(insTwitterPostStmt, insTwitterPostParm, (err, results, fields) => {
+			/*
+			mysqlConnection.query(insTwitterPostStmt, insTwitterPostParm, function (err, results, fields) {
                                 if (err) {
 					console.log("rollback on TwitterPost table!");
 					return mysqlConnection.rollback(function() {
-						throw err;
+						//throw err;
+						return res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ error: err, message: err.message }); // 500
 					});
                                 }
                                 console.log("insert Id(Twitter Post):" + results.insertId);
                         });
+			*/
 
 			//insert into ArticlePost table
                         var insArticlePostStmt = `INSERT INTO ArticlePost (discord_id, article_url) VALUES (?, ?)`;
                         var insArticlePostParm = [req.body.discord_id, req.body.article_url];
 
-                        mysqlConnection.query(insArticlePostStmt, insArticlePostParm, (err, results, fields) => {
+			async function articlePostInsert() {
+				await mysqlConnection.query(insArticlePostStmt, insArticlePostParm, function (err, results, fields) {
+                                if (err) {
+                                        console.log("rollback on ArticlePost table!");
+                                        return mysqlConnection.rollback(function() {
+                                                //throw err;
+                                                return res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ error: err, message: err.message }); // 500
+                                        });
+                                }
+                                console.log("insert Id(Article Post):" + results.insertId);
+                        	});
+ 
+			}
+
+			/*
+                        mysqlConnection.query(insArticlePostStmt, insArticlePostParm, function (err, results, fields) {
                                 if (err) {
 					console.log("rollback on ArticlePost table!");
 					return mysqlConnection.rollback(function() {
-                                                throw err;
+                                                //throw err;
+						return res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ error: err, message: err.message }); // 500
                                         });
                                 }
                                 console.log("insert Id(Article Post):" + results.insertId);
                         });
+			*/
 
 			//insert into Incentives_Gained table
                         var insIncentivesGainedStmt = `INSERT INTO Incentives_Gained (discord_id, valued_transactions, total_transactions, amount_gained) VALUES (?, ?, ?, ?)`;
                         var insIncentivesGainedParm = [req.body.discord_id, req.body.valued_txn, req.body.total_txn, req.body.amount_gained];
 
-                        mysqlConnection.query(insIncentivesGainedStmt, insIncentivesGainedParm, (err, results, fields) => {
+			async function incentivesGainInsert() {
+				await mysqlConnection.query(insIncentivesGainedStmt, insIncentivesGainedParm, function (err, results, fields) {
+                                if (err) {
+                                        console.log("rollback on Incentives_Gained table!");
+                                        return mysqlConnection.rollback(function() {
+                                                //throw err;
+                                                return res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ error: err, message: err.message }); // 500
+                                                console.log("shouldn't reach here!")
+                                        });
+                                }
+                                console.log("insert Id(Incentives Gained):" + results.insertId);
+                        	});
+			}
+
+			/*
+                        mysqlConnection.query(insIncentivesGainedStmt, insIncentivesGainedParm, function (err, results, fields) {
                                 if (err) {
 					console.log("rollback on Incentives_Gained table!");
 					return mysqlConnection.rollback(function() {
-                                                throw err;
+                                                //throw err;
+						return res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ error: err, message: err.message }); // 500
+						//return res.send("Error!");
+						console.log("shouldn't reach here!")
 						//throw new Error('my error');
 						//next(err);
 						//throw { status: 404, message: 'Not supported' }
@@ -276,13 +413,15 @@ app.post("/form",  function (req, res) {
                                 }
                                 console.log("insert Id(Incentives Gained):" + results.insertId);
                         });
-	
+			*/
+
 			console.log("committing...");
 
 			mysqlConnection.commit(function(err) {
 				if (err) {
 					return mysqlConnection.rollback(function(err) {
-						throw err;
+						//throw err;
+						return res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ error: err, message: err.message }); // 500
 					});
 				}
 			});
