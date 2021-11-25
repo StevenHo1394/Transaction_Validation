@@ -160,7 +160,7 @@ app.get('/fail', function(req, res) {
     res.send('form failed!');
 });
 
-app.post("/form",  function (req, res) {
+app.post("/form",  async function (req, res) {
 
 			/*			
 			console.log("discord_id=" + req.body.discord_id);
@@ -175,12 +175,10 @@ app.post("/form",  function (req, res) {
 			console.log("article_url=" + req.body.article_url);
 			*/
 
-			//var dbConfig = require('./config.js');
-			//var mysqlConnection = mysql.createConnection(dbConfig.databaseOptions);
-
 			async function insertFormData2DB (req, res) {
-				console.log("entered insertFormDataDB");
+				await console.log("entered insertFormDataDB");
 
+				/*
 				console.log("discord_id=" + req.body.discord_id);
                        		console.log("txn_hash=" + req.body.txn_hash);
                         	console.log("txn_type=" + req.body.txn_type);
@@ -191,6 +189,7 @@ app.post("/form",  function (req, res) {
                 	        console.log("total_txn=" + req.body.total_txn);
         	                console.log("amount_gained=" + req.body.amount_gained);
 	                        console.log("article_url=" + req.body.article_url);
+				*/
 
 				const conn = await mysql.createConnection(dbConfig.databaseOptions);
 				var result = true;
@@ -201,25 +200,25 @@ app.post("/form",  function (req, res) {
 
                                         var insTwitterPostStmt = `INSERT INTO TwitterPost (discord_id, twitter_url) VALUES (?, ?)`;
 
-					console.log("parms = " + insTwitterPostParm[0] + ", " + insTwitterPostParm[1] );
+					await console.log("parms = " + insTwitterPostParm[0] + ", " + insTwitterPostParm[1] );
                                         await conn.execute(insTwitterPostStmt, insTwitterPostParm);
                                 }
                                 catch (err) {
-                                        console.log("error in inserting. Error message = " + err.message);
+                                        await console.log("error in inserting. Error message = " + err.message);
 
-					console.log("result chkpt1 = " + result);
+					await console.log("result chkpt1 = " + result);
 					result = false;
-					console.log("result chkpt2 = " + result);
+					await console.log("result chkpt2 = " + result);
                                 }
 
-				console.log("result chkpt3 = " + result);
+				await console.log("result chkpt3 = " + result);
 
 				if (result == true) {
-					console.log("No problem during insert! Committing...");
+					await console.log("No problem during insert! Committing...");
 					await conn.execute(`COMMIT`);
 					await conn.end();
 				} else {
-					console.log("Rollback...");
+					await console.log("Rollback...");
 					await conn.query(`ROLLBACK`);
 					await conn.end();
 				}
@@ -227,52 +226,18 @@ app.post("/form",  function (req, res) {
 				return result;
 			};
 
-			result = insertFormData2DB(req, res);
-			console.log("result chkpt4 = " + result);
+			result = await insertFormData2DB(req, res);
 
-			if (result == true) {
-				return res.redirect('/success');
-			}
-			else {
-				return res.redirect('/fail');
-			}
+			//result = insertFormData2DB(req, res);
+			await console.log("result chkpt4 = " + result);
 
-			//return res.redirect('/success');
-			//return res.redirect('/fail');
-
-			mysqlConnection.connect();
-			
-			mysqlConnection.on('error', function(err) {
-   	 			console.log("error event = " + err);
-			});
-			
-			mysqlConnection.query(`BEGIN`, function(err) {
-				if (err) {
-                                        return mysqlConnection.rollback(function(err) {
-                                                //throw err;
-						return res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ error: err, message: err.message }); // 500
-                                        });
-                                }
-                        });
-
-			//insert into TwitterPost table
-                        async function twitterPostInsert() {
-
-				console.log("entered twitterPostInsert()")
-
-                                try {
-					var insTwitterPostStmt = `INSERT INTO TwitterPost (discord_id, twitter_url) VALUES (?, ?)`;
-                        		var insTwitterPostParm = [req.body.discord_id, req.body.twitter_url];
-                                        await mysqlConnection.query(insTwitterPostStmt, insTwitterPostParm);
-                                }
-                                catch (err) {
-                                        console.log("error in inserting twitter post!");
-                                        mysqlConnection.rollback();
-                                        throw err;
-                                }                        
-			}
-
-			twitterPostInsert();
+			if ( result == true) {
+				await console.log("chkpt 5");
+                        	return res.redirect('/success');
+                        } else {
+				await console.log("chkpt 6");
+                                return res.redirect('/fail');
+                        }
 
 			//insert into TransactionTypes table
 			var insTransactionTypesStmt = `INSERT INTO TransactionTypes (name, description, amount) VALUES (?, ?, ?)`;
@@ -415,18 +380,6 @@ app.post("/form",  function (req, res) {
                         });
 			*/
 
-			console.log("committing...");
-
-			mysqlConnection.commit(function(err) {
-				if (err) {
-					return mysqlConnection.rollback(function(err) {
-						//throw err;
-						return res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ error: err, message: err.message }); // 500
-					});
-				}
-			});
-
-			mysqlConnection.end();
 		}
         );
 
