@@ -29,56 +29,12 @@ app.use(session(session_configuration));
 app.use(express.json());
 express.urlencoded({ extended: true })
 
-/*
-function authenticatedOrNot(req, res, next){
-    if(req.isAuthenticated()){
-        next();
-    }else{
-        res.redirect("/form");
-    }
-}
-*/
-
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }))
 
 // parse application/json
 app.use(bodyParser.json())
 
-/*
-passport.use(new LocalStrategy(
-    function(username, password, done) {
-        setTimeout(function () {
-        for (userid in users) {
-            var user = users[userid];
-            console.log(user);
-            if (user.username.toLowerCase() == username.toLowerCase()) {
-                if (user.password == password) {
-                    return done(null, user);
-                }
-            }
-        }
-        return done(null, false, { message: 'Incorrect credentials.' });
-            }, 1000);
-    }
-));
-
-passport.serializeUser(function(user, done) {
-    if (users["id" + user.id]) {
-        done(null, "id" + user.id);
-    } else {
-        done(new Error("WAT"));
-    }
-});
-
-passport.deserializeUser(function(userid, done) {
-    if (users[userid]) {
-        done(null, users[userid]);
-    } else {
-        done(new Error("CANTFINDUSER"));
-    }
-});
-*/
 
 app.get('/', function(req, res) {
     console.log(req.flash());
@@ -89,7 +45,7 @@ app.get("/form", function (req, res) {
 
     var error = req.flash("error");
 
-    var form = 
+    var form =
 	'<form action="/form" method="post">' +
         '    <div>' +
         '        <label>Discord ID:</label>' +
@@ -104,11 +60,11 @@ app.get("/form", function (req, res) {
         '        <select name = "txn_type">' +
         '               <option value = "Validator Creation Transaction">Validator Creation Transaction</option>' +
         '               <option value = "Delegation Transaction">Delegation Transaction</option>' +
-	'               <option value = "Denom Creation Transaction">Denom Creation Transaction</option>' +			
-	'               <option value = "NFT collection minting Transaction">NFT collection minting Transaction</option>' +		
-	'               <option value = "Governance Proposal Voting Transaction">Governance Proposal Voting Transaction</option>' +	
+	'               <option value = "Denom Creation Transaction">Denom Creation Transaction</option>' +
+	'               <option value = "NFT collection minting Transaction">NFT collection minting Transaction</option>' +
+	'               <option value = "Governance Proposal Voting Transaction">Governance Proposal Voting Transaction</option>' +
         '        </select>' +
-        '    </div>' +		
+        '    </div>' +
         '    <div>' +
         '        <label>Transaction Description:</label>' +
         '        <input type="text" name="txn_description"/>' +
@@ -136,11 +92,10 @@ app.get("/form", function (req, res) {
         '    <div>' +
         '        <label>Article URL:</label>' +
         '        <input type="text" name="article_url"/>' +
-        '    </div>' +		
+        '    </div>' +
         '    <div>' +
         '        <input type="submit" value="Submit"/>' +
         '    </div>' +
-	
         '</form>';
 
     if (error && error.length) {
@@ -152,12 +107,19 @@ app.get("/form", function (req, res) {
 
 app.get('/success', function(req, res) {
     //console.log(req.flash());
-    res.send('form filled success!');
+    res.send('Form filled success!');
 });
 
-app.get('/fail', function(req, res) {
+app.get('/fail/:errMessage', function(req, res) {
     //console.log(req.flash());
-    res.send('form failed!');
+    //res.send('Form failed!\n' + errMessage);
+
+    res.send(
+	'<html>' + 
+	'<p>Form failed!</p>' +
+	'<p>' + errMessage + '</p>' + 
+	'</html>'
+		);
 });
 
 app.post("/form",  async function (req, res) {
@@ -180,6 +142,7 @@ app.post("/form",  async function (req, res) {
 
 				const conn = await mysql.createConnection(dbConfig.databaseOptions);
 				var result = true;
+				var errMessage = null;
 				var insTwitterPostParm = [req.body.discord_id, req.body.twitter_url];
 
 				try {
@@ -212,7 +175,8 @@ app.post("/form",  async function (req, res) {
 
                                 }
                                 catch (err) {
-                                        await console.log("error in inserting. Error message = " + err.message);
+                                        await console.log("Error in inserting! Error message = " + err.message);
+					errMessage = err.message
 
 					await console.log("result chkpt1 = " + result);
 					result = false;
@@ -231,10 +195,10 @@ app.post("/form",  async function (req, res) {
 					await conn.end();
 				}
 
-				return result;
+				return [result, errMessage];
 			};
 
-			result = await insertFormData2DB(req, res);
+			[result, errMessage] = await insertFormData2DB(req, res);
 
 			//result = insertFormData2DB(req, res);
 			await console.log("result chkpt4 = " + result);
@@ -244,17 +208,11 @@ app.post("/form",  async function (req, res) {
                         	return res.redirect('/success');
                         } else {
 				await console.log("chkpt 6");
-                                return res.redirect('/fail');
+                                return res.redirect('/fail/' + errMessage);
                         }
 
 		}
         );
-
-/*
-app.get("/members", authenticatedOrNot, function (req, res) {
-    res.send("secret members only area!");
-});
-*/
 
 app.listen(8080);
 
